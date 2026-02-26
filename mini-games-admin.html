@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini-Games Admin</title>
+<style>
+  :root {
+    --bg: #0b0b0b;
+    --panel: #151515;
+    --panel-2: #1d1d1d;
+    --text: #f3f3f3;
+    --muted: #b8b8b8;
+    --accent: #f4c542;
+    --line: #2c2c2c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .wrap {
+    width: min(1200px, 96vw);
+    margin: 18px auto 26px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  h1, h2, h3, p { margin: 0; }
+  h1 { font-size: 22px; margin-bottom: 10px; }
+  .sub { color: var(--muted); margin-bottom: 12px; font-size: 14px; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  input[type="number"], input[type="text"], textarea {
+    background: #0f0f0f;
+    color: var(--text);
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 14px;
+  }
+  input[type="number"] { width: 120px; }
+
+  button {
+    border: 1px solid #505050;
+    background: var(--panel-2);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  button:hover { border-color: var(--accent); }
+
+  .game-editor {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 10px;
+  }
+  .game-title { margin-bottom: 10px; font-size: 18px; }
+  .upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .upload-box {
+    background: #101010;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .upload-box label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .file-name {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #d7d7d7;
+    word-break: break-all;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 10px;
+  }
+  .canvas-wrap {
+    background: #0f0f0f;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .hint { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  canvas {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    display: block;
+    border-radius: 8px;
+    background: #000;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .preview-b {
+    background: #0f0f0f;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .preview-b img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: contain;
+    background: #000;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .tools {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .count { font-size: 13px; color: var(--muted); }
+
+  .rect-list {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+  }
+  .rect-item {
+    margin: 5px 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .small-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 999px;
+  }
+
+  .output-head {
+    margin: 8px 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  textarea {
+    width: 100%;
+    min-height: 280px;
+    resize: vertical;
+    font-family: Consolas, Monaco, monospace;
+    line-height: 1.4;
+  }
+
+  .ok { color: #8fff8f; }
+  .warn { color: #ffd56a; }
+
+  @media (max-width: 880px) {
+    .preview-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>Mini-Games Admin</h1>
+      <p class="sub">
+        Build multiple mini-games. For each mini-game: upload 2 images and drag on image A to mark each difference area.
+      </p>
+      <div class="row">
+        <label for="miniGameCount">Mini-games count:</label>
+        <input id="miniGameCount" type="number" min="1" value="2" />
+        <button id="buildBtn" type="button">Create Editors</button>
+        <button id="generateBtn" type="button">Generate miniGames Code</button>
+        <button id="copyBtn" type="button">Copy Code</button>
+      </div>
+      <p id="topStatus" class="sub" style="margin-top:10px;">Ready.</p>
+    </div>
+
+    <div id="gamesContainer"></div>
+
+    <div class="panel">
+      <h3>Output Code</h3>
+      <p class="output-head">Replace the existing <code>const miniGames = [...]</code> block in your game file with this output.</p>
+      <textarea id="output" spellcheck="false"></textarea>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const gamesContainer = document.getElementById('gamesContainer');
+  const miniGameCountInput = document.getElementById('miniGameCount');
+  const buildBtn = document.getElementById('buildBtn');
+  const generateBtn = document.getElementById('generateBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const outputEl = document.getElementById('output');
+  const topStatus = document.getElementById('topStatus');
+
+  const gameStates = [];
+
+  function setStatus(text, level) {
+    topStatus.textContent = text;
+    topStatus.classList.remove('ok', 'warn');
+    if (level) topStatus.classList.add(level);
+  }
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function createGameEditor(index) {
+    const wrapper = document.createElement('section');
+    wrapper.className = 'game-editor';
+
+    wrapper.innerHTML = [
+      '<h2 class="game-title">Mini-game ' + (index + 1) + '</h2>',
+      '<div class="row" style="margin-bottom:10px">',
+      '  <label style="min-width:130px">Mini-game name</label>',
+      '  <input class="input-name" type="text" placeholder="e.g. Carnival Round" />',
+      '</div>',
+      '<div class="upload-grid">',
+      '  <div class="upload-box">',
+      '    <label>Image A (used for marking differences)</label>',
+      '    <input class="input-a" type="file" accept="image/*" />',
+      '    <div class="file-name name-a">No file selected</div>',
+      '  </div>',
+      '  <div class="upload-box">',
+      '    <label>Image B</label>',
+      '    <input class="input-b" type="file" accept="image/*" />',
+      '    <div class="file-name name-b">No file selected</div>',
+      '  </div>',
+      '</div>',
+      '<div class="preview-grid">',
+      '  <div class="canvas-wrap">',
+      '    <canvas class="mark-canvas" width="960" height="600"></canvas>',
+      '    <div class="hint">Draw: press + drag on Image A. Remove items from list if needed.</div>',
+      '  </div>',
+      '  <div class="preview-b">',
+      '    <img class="img-b" alt="Image B preview" />',
+      '  </div>',
+      '</div>',
+      '<div class="tools">',
+      '  <button class="undo-btn" type="button">Undo Last</button>',
+      '  <button class="clear-btn" type="button">Clear All</button>',
+      '  <span class="count">Differences: 0</span>',
+      '</div>',
+      '<ol class="rect-list"></ol>'
+    ].join('');
+
+    const state = {
+      index,
+      root: wrapper,
+      inputName: wrapper.querySelector('.input-name'),
+      inputA: wrapper.querySelector('.input-a'),
+      inputB: wrapper.querySelector('.input-b'),
+      nameA: wrapper.querySelector('.name-a'),
+      nameB: wrapper.querySelector('.name-b'),
+      canvas: wrapper.querySelector('.mark-canvas'),
+      ctx: null,
+      imgB: wrapper.querySelector('.img-b'),
+      undoBtn: wrapper.querySelector('.undo-btn'),
+      clearBtn: wrapper.querySelector('.clear-btn'),
+      countEl: wrapper.querySelector('.count'),
+      listEl: wrapper.querySelector('.rect-list'),
+      miniGameName: 'Mini-game ' + (index + 1),
+      imageAName: '',
+      imageBName: '',
+      imageAUrl: '',
+      imageBUrl: '',
+      imageAElement: null,
+      rects: [],
+      draft: null,
+      drawing: false,
+      drawParams: { scale: 1, dx: 0, dy: 0, dw: 0, dh: 0 },
+      activePointerId: null
+    };
+
+    state.ctx = state.canvas.getContext('2d');
+    state.imgB.src = '';
+    if (state.inputName) {
+      state.inputName.value = state.miniGameName;
+      state.inputName.addEventListener('input', () => {
+        state.miniGameName = (state.inputName.value || '').trim() || ('Mini-game ' + (state.index + 1));
+      });
+    }
+
+    function releaseUrls() {
+      if (state.imageAUrl) URL.revokeObjectURL(state.imageAUrl);
+      if (state.imageBUrl) URL.revokeObjectURL(state.imageBUrl);
+      state.imageAUrl = '';
+      state.imageBUrl = '';
+    }
+
+    function computeDrawParams() {
+      if (!state.imageAElement || !state.imageAElement.naturalWidth || !state.imageAElement.naturalHeight) {
+        state.drawParams = { scale: 1, dx: 0, dy: 0, dw: 0, dh: 0 };
+        return;
+      }
+      const cw = state.canvas.width;
+      const ch = state.canvas.height;
+      const iw = state.imageAElement.naturalWidth;
+      const ih = state.imageAElement.naturalHeight;
+      const scale = Math.min(cw / iw, ch / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (cw - dw) * 0.5;
+      const dy = (ch - dh) * 0.5;
+      state.drawParams = { scale, dx, dy, dw, dh };
+    }
+
+    function canvasPointFromEvent(e) {
+      const r = state.canvas.getBoundingClientRect();
+      const sx = state.canvas.width / r.width;
+      const sy = state.canvas.height / r.height;
+      return {
+        x: (e.clientX - r.left) * sx,
+        y: (e.clientY - r.top) * sy
+      };
+    }
+
+    function naturalPoint(canvasX, canvasY) {
+      const p = state.drawParams;
+      const img = state.imageAElement;
+      if (!img) return null;
+      const nx = (canvasX - p.dx) / p.scale;
+      const ny = (canvasY - p.dy) / p.scale;
+      return {
+        x: clamp(nx, 0, img.naturalWidth),
+        y: clamp(ny, 0, img.naturalHeight)
+      };
+    }
+
+    function isInsideImage(canvasX, canvasY) {
+      const p = state.drawParams;
+      return canvasX >= p.dx && canvasX <= p.dx + p.dw && canvasY >= p.dy && canvasY <= p.dy + p.dh;
+    }
+
+    function drawRectCanvas(x, y, w, h, style) {
+      const ctx = state.ctx;
+      ctx.save();
+      ctx.strokeStyle = style.stroke;
+      ctx.fillStyle = style.fill;
+      ctx.lineWidth = style.lineWidth;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+    }
+
+    function redraw() {
+      const ctx = state.ctx;
+      const cw = state.canvas.width;
+      const ch = state.canvas.height;
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, cw, ch);
+
+      if (state.imageAElement) {
+        computeDrawParams();
+        const p = state.drawParams;
+        ctx.drawImage(state.imageAElement, p.dx, p.dy, p.dw, p.dh);
+
+        state.rects.forEach((r, i) => {
+          const x = p.dx + r.x * p.scale;
+          const y = p.dy + r.y * p.scale;
+          const w = r.width * p.scale;
+          const h = r.height * p.scale;
+          drawRectCanvas(x, y, w, h, {
+            stroke: '#ff4040',
+            fill: 'rgba(255,64,64,0.18)',
+            lineWidth: 2
+          });
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 14px Arial';
+          ctx.fillText(String(i + 1), x + 5, y + 16);
+        });
+
+        if (state.draft) {
+          const d = state.draft;
+          const x = Math.min(d.start.x, d.current.x);
+          const y = Math.min(d.start.y, d.current.y);
+          const w = Math.abs(d.current.x - d.start.x);
+          const h = Math.abs(d.current.y - d.start.y);
+          drawRectCanvas(x, y, w, h, {
+            stroke: '#f4c542',
+            fill: 'rgba(244,197,66,0.20)',
+            lineWidth: 2
+          });
+        }
+      }
+
+      state.countEl.textContent = 'Differences: ' + state.rects.length;
+      renderRectList();
+    }
+
+    function renderRectList() {
+      state.listEl.innerHTML = '';
+      state.rects.forEach((r, i) => {
+        const li = document.createElement('li');
+        li.className = 'rect-item';
+        const txt = document.createElement('span');
+        txt.textContent = '#' + (i + 1) + '  x:' + r.x + '  y:' + r.y + '  width:' + r.width + '  height:' + r.height;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'small-btn';
+        btn.textContent = 'Delete';
+        btn.addEventListener('click', () => {
+          state.rects.splice(i, 1);
+          redraw();
+        });
+        li.appendChild(txt);
+        li.appendChild(btn);
+        state.listEl.appendChild(li);
+      });
+    }
+
+    state.inputA.addEventListener('change', () => {
+      const file = state.inputA.files && state.inputA.files[0];
+      if (!file) return;
+      if (state.imageAUrl) URL.revokeObjectURL(state.imageAUrl);
+      state.imageAUrl = URL.createObjectURL(file);
+      state.imageAName = file.name;
+      state.nameA.textContent = file.name;
+
+      const img = new Image();
+      img.onload = () => {
+        state.imageAElement = img;
+        state.rects = [];
+        state.draft = null;
+        redraw();
+      };
+      img.src = state.imageAUrl;
+    });
+
+    state.inputB.addEventListener('change', () => {
+      const file = state.inputB.files && state.inputB.files[0];
+      if (!file) return;
+      if (state.imageBUrl) URL.revokeObjectURL(state.imageBUrl);
+      state.imageBUrl = URL.createObjectURL(file);
+      state.imageBName = file.name;
+      state.nameB.textContent = file.name;
+      state.imgB.src = state.imageBUrl;
+    });
+
+    state.undoBtn.addEventListener('click', () => {
+      state.rects.pop();
+      redraw();
+    });
+
+    state.clearBtn.addEventListener('click', () => {
+      state.rects = [];
+      state.draft = null;
+      redraw();
+    });
+
+    state.canvas.addEventListener('pointerdown', (e) => {
+      if (!state.imageAElement) {
+        setStatus('Load Image A first for this mini-game.', 'warn');
+        return;
+      }
+      const p = canvasPointFromEvent(e);
+      if (!isInsideImage(p.x, p.y)) return;
+      state.canvas.setPointerCapture(e.pointerId);
+      state.activePointerId = e.pointerId;
+      state.drawing = true;
+      state.draft = {
+        start: { x: p.x, y: p.y },
+        current: { x: p.x, y: p.y }
+      };
+      redraw();
+    });
+
+    state.canvas.addEventListener('pointermove', (e) => {
+      if (!state.drawing || state.activePointerId !== e.pointerId || !state.draft) return;
+      const p = canvasPointFromEvent(e);
+      state.draft.current.x = p.x;
+      state.draft.current.y = p.y;
+      redraw();
+    });
+
+    function endDraw(e) {
+      if (!state.drawing || state.activePointerId !== e.pointerId || !state.draft) return;
+      state.drawing = false;
+      state.canvas.releasePointerCapture(e.pointerId);
+      state.activePointerId = null;
+
+      const x1 = Math.min(state.draft.start.x, state.draft.current.x);
+      const y1 = Math.min(state.draft.start.y, state.draft.current.y);
+      const x2 = Math.max(state.draft.start.x, state.draft.current.x);
+      const y2 = Math.max(state.draft.start.y, state.draft.current.y);
+
+      const p1 = naturalPoint(x1, y1);
+      const p2 = naturalPoint(x2, y2);
+
+      state.draft = null;
+
+      if (!p1 || !p2) {
+        redraw();
+        return;
+      }
+
+      const rect = {
+        x: Math.round(Math.min(p1.x, p2.x)),
+        y: Math.round(Math.min(p1.y, p2.y)),
+        width: Math.round(Math.abs(p2.x - p1.x)),
+        height: Math.round(Math.abs(p2.y - p1.y))
+      };
+
+      if (rect.width >= 3 && rect.height >= 3) {
+        state.rects.push(rect);
+      }
+      redraw();
+    }
+
+    state.canvas.addEventListener('pointerup', endDraw);
+    state.canvas.addEventListener('pointercancel', endDraw);
+
+    const resizeObserver = new ResizeObserver(() => redraw());
+    resizeObserver.observe(state.canvas);
+
+    wrapper.addEventListener('remove-editor', () => {
+      releaseUrls();
+      resizeObserver.disconnect();
+    });
+
+    redraw();
+    return state;
+  }
+
+  function clearEditors() {
+    gameStates.forEach((state) => {
+      state.root.dispatchEvent(new Event('remove-editor'));
+    });
+    gameStates.length = 0;
+    gamesContainer.innerHTML = '';
+  }
+
+  function buildEditors() {
+    const count = clamp(parseInt(miniGameCountInput.value, 10) || 1, 1, 100);
+    miniGameCountInput.value = String(count);
+    clearEditors();
+
+    for (let i = 0; i < count; i++) {
+      const state = createGameEditor(i);
+      gameStates.push(state);
+      gamesContainer.appendChild(state.root);
+    }
+
+    setStatus('Created ' + count + ' mini-game editor(s).', 'ok');
+  }
+
+  function generateCode() {
+    const miniGames = gameStates.map((g) => ({
+      name: (g.miniGameName || '').trim() || ('Mini-game ' + (g.index + 1)),
+      image1: g.imageAName || ('imageA_' + (g.index + 1) + '.png'),
+      image2: g.imageBName || ('imageB_' + (g.index + 1) + '.png'),
+      differences: g.rects.map((r) => ({
+        x: r.x,
+        y: r.y,
+        width: r.width,
+        height: r.height
+      }))
+    }));
+
+    const code = [
+      'const miniGames = ' + JSON.stringify(miniGames, null, 2) + ';'
+    ].join('\n');
+
+    outputEl.value = code;
+
+    const missing = miniGames.filter((g) => !g.image1 || !g.image2 || g.differences.length === 0).length;
+    if (missing > 0) {
+      setStatus('Code generated. ' + missing + ' mini-game(s) are missing image names or differences.', 'warn');
+    } else {
+      setStatus('Code generated successfully for ' + miniGames.length + ' mini-game(s).', 'ok');
+    }
+  }
+
+  async function copyCode() {
+    if (!outputEl.value.trim()) {
+      setStatus('Generate code first.', 'warn');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(outputEl.value);
+      setStatus('Code copied to clipboard.', 'ok');
+    } catch (_) {
+      outputEl.select();
+      document.execCommand('copy');
+      setStatus('Code copied (fallback).', 'ok');
+    }
+  }
+
+  buildBtn.addEventListener('click', buildEditors);
+  generateBtn.addEventListener('click', generateCode);
+  copyBtn.addEventListener('click', copyCode);
+
+  buildEditors();
+})();
+</script>
+</body>
+</html>
