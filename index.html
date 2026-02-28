@@ -991,16 +991,48 @@ function getImageDrawMetrics(img){
  return {natW,natH,scale,drawW,drawH,padX,padY};
 }
 
+function getImageBaseRect(img){
+ const box=img.closest('.imgbox');
+ const boxRect=box?box.getBoundingClientRect():img.getBoundingClientRect();
+ const left=boxRect.left+(img.offsetLeft||0);
+ const top=boxRect.top+(img.offsetTop||0);
+ const width=img.clientWidth||boxRect.width||1;
+ const height=img.clientHeight||boxRect.height||1;
+ return {left,top,width,height,boxRect};
+}
+
+function screenToBasePoint(img,x,y){
+ const base=getImageBaseRect(img);
+ const cX=base.boxRect.left+base.boxRect.width*0.5;
+ const cY=base.boxRect.top+base.boxRect.height*0.5;
+ return {
+  x:cX+((x-zoomOffsetX)-cX)/zoomScale,
+  y:cY+((y-zoomOffsetY)-cY)/zoomScale
+ };
+}
+
+function baseToScreenPoint(img,x,y){
+ const base=getImageBaseRect(img);
+ const cX=base.boxRect.left+base.boxRect.width*0.5;
+ const cY=base.boxRect.top+base.boxRect.height*0.5;
+ return {
+  x:cX+(x-cX)*zoomScale+zoomOffsetX,
+  y:cY+(y-cY)*zoomScale+zoomOffsetY
+ };
+}
+
 function natural(img,x,y){
- const r=img.getBoundingClientRect();
+ const base=getImageBaseRect(img);
  const m=getImageDrawMetrics(img);
- const lx=x-r.left-m.padX;
- const ly=y-r.top-m.padY;
+ const p=screenToBasePoint(img,x,y);
+ const lx=p.x-base.left-m.padX;
+ const ly=p.y-base.top-m.padY;
  return {
   x:clamp(lx/m.scale,0,m.natW),
   y:clamp(ly/m.scale,0,m.natH)
  };
 }
+
 
 function mark(box,img){
  const mtx=getImageDrawMetrics(img);
@@ -1283,13 +1315,13 @@ function stopAllStarFlights(){
 }
 
 function getDifferenceCenterOnScreen(box,img){
- const rect=img.getBoundingClientRect();
+ const base=getImageBaseRect(img);
  const m=getImageDrawMetrics(img);
- return {
-  x:rect.left+m.padX+(box.x+box.width*0.5)*m.scale,
-  y:rect.top+m.padY+(box.y+box.height*0.5)*m.scale
- };
+ const baseX=base.left+m.padX+(box.x+box.width*0.5)*m.scale;
+ const baseY=base.top+m.padY+(box.y+box.height*0.5)*m.scale;
+ return baseToScreenPoint(img,baseX,baseY);
 }
+
 
 function showFinishPopup(){
  if(!finishPopup)return;
