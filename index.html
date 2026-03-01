@@ -411,8 +411,6 @@ let finalResultsSubmitted=false;
 let submittingResults=false;
 let groupSessionId=resolveGroupSessionId();
 let participantId=resolveGroupPlayerId();
-let startupScoresResetDone=false;
-let startupScoresResetInFlight=false;
 let liveWinnerPollTimer=null;
 let liveWinnerPollInFlight=false;
 let liveWinnerName='';
@@ -476,10 +474,6 @@ function resolveGroupPlayerId(){
 
 function getScoresSelectQuery(){
  return 'name,total_game_ms,updated_at,completed_rounds,total_mini_games,is_final';
-}
-
-function buildScoresDeleteUrl(){
- return SUPABASE_URL+'/rest/v1/'+SUPABASE_TABLE+'?or=(name.is.null,name.not.is.null)';
 }
 
 function buildScoresRequestUrl(useSessionFilter=true){
@@ -912,86 +906,6 @@ function resetParticipantSession(){
  sessionStartedAt=Date.now();
 }
 
-async function clearScoresTableBeforeJoin(){
- const beforeCount=await fetchVisibleScoresCount();
- const response=await fetch(buildScoresDeleteUrl(),{
-  method:'DELETE',
-  mode:'cors',
-  cache:'no-store',
-  headers:{
-   'Accept':'application/json',
-   'apikey':SUPABASE_ANON_KEY,
-   'Authorization':'Bearer '+SUPABASE_ANON_KEY,
-   'Prefer':'return=representation'
-  }
- });
- const text=await response.text();
- if(!response.ok){
-  throw new Error('HTTP '+response.status+' '+text.slice(0,220));
- }
- const afterCount=await fetchVisibleScoresCount();
- if(beforeCount>0&&afterCount>=beforeCount){
-  throw new Error('no_rows_deleted_check_delete_policy');
- }
-}
-
-function parseExactCount(contentRange){
- const raw=String(contentRange||'');
- const slash=raw.lastIndexOf('/');
- if(slash<0)return 0;
- const tail=raw.slice(slash+1).trim();
- const n=Number(tail);
- return Number.isFinite(n)&&n>=0?n:0;
-}
-
-async function fetchVisibleScoresCount(){
- const response=await fetch(SUPABASE_URL+'/rest/v1/'+SUPABASE_TABLE+'?select=name&limit=1',{
-  method:'GET',
-  mode:'cors',
-  cache:'no-store',
-  headers:{
-   'Accept':'application/json',
-   'apikey':SUPABASE_ANON_KEY,
-   'Authorization':'Bearer '+SUPABASE_ANON_KEY,
-   'Prefer':'count=exact'
-  }
- });
- if(!response.ok){
-  const text=await response.text();
-  throw new Error('count_failed HTTP '+response.status+' '+text.slice(0,180));
- }
- return parseExactCount(response.headers.get('content-range'));
-}
-
-async function ensureScoresResetBeforeJoin(){
- if(startupScoresResetDone)return true;
- if(startupScoresResetInFlight)return false;
- startupScoresResetInFlight=true;
- setParticipantUiReady(false);
- setPlayerGateError('מוחק נתונים קיימים מטבלת scores...');
- setSyncStatus('מנקה את טבלת scores לפני התחלת המשחק...',false,true);
- try{
-  await clearScoresTableBeforeJoin();
-  startupScoresResetDone=true;
-  setPlayerGateError('');
-  setSyncStatus('טבלת scores נוקתה בהצלחה');
-  return true;
- }catch(err){
-  const msg=err&&err.message?err.message:String(err||'unknown_error');
-  if(msg==='no_rows_deleted_check_delete_policy'){
-   setPlayerGateError('הניקוי לא מחק שורות. יש להוסיף DELETE policy לטבלת scores.');
-   setSyncStatus('נדרש DELETE policy ב-scores עבור anon',true,true);
-   return false;
-  }
-  setPlayerGateError('נכשל ניקוי scores: '+msg);
-  setSyncStatus('שגיאת איפוס scores: '+msg,true,true);
-  return false;
- }finally{
-  startupScoresResetInFlight=false;
-  setParticipantUiReady(true);
- }
-}
-
 async function joinParticipant(name){
  participantName=name;
  participantId=resolveGroupPlayerId();
@@ -1009,8 +923,6 @@ async function joinParticipant(name){
 if(playerFormEl){
  playerFormEl.addEventListener('submit',async(event)=>{
   event.preventDefault();
-  const resetOk=await ensureScoresResetBeforeJoin();
-  if(!resetOk)return;
   const candidate=String(playerNameInputEl&&playerNameInputEl.value||'').trim();
   if(!candidate){
    setPlayerGateError('יש להזין שם משתתף.');
@@ -1028,7 +940,6 @@ if(playerFormEl){
 }
 
 setParticipantUiReady(false);
-ensureScoresResetBeforeJoin().catch(()=>{});
 window.forceScoreSync=()=>submitParticipantResults(false);
 
 function unlockCorrectTapAudio(){
@@ -1928,12 +1839,12 @@ function maybeCelebrateWin(){
  }else{
   submitParticipantResults(false);
  }
- playWinMelody();
  if(finishConfettiTimer){
   clearTimeout(finishConfettiTimer);
   finishConfettiTimer=null;
  }
  finishConfettiTimer=setTimeout(()=>{
+  playWinMelody();
   showFinishPopup();
   launchConfetti();
   if(isFinalRound){
