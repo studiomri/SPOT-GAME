@@ -43,7 +43,7 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
  60%{transform:translate(-50%,-50%) scale(.94);opacity:1}
  100%{transform:translate(-50%,-50%) scale(1);opacity:0}
 }
-#hearts{position:fixed;top:max(8px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:auto;display:flex;gap:8px;justify-content:flex-start;align-items:center;z-index:40;pointer-events:none}
+#hearts{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 20px);left:max(12px,env(safe-area-inset-left));right:auto;display:flex;gap:8px;justify-content:flex-start;align-items:center;z-index:40;pointer-events:none}
 .heart{display:inline-block;width:22px;height:22px;background-image:url('heartRED.svg');background-size:contain;background-position:center;background-repeat:no-repeat;transition:transform .2s ease,filter .2s ease,opacity .2s ease}
 .heart.lost{background-image:url('heartGREY.svg');opacity:1;transform:scale(.9);filter:none}
 #status{margin-top:8px;font-weight:800}
