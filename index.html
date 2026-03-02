@@ -59,7 +59,9 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 .star.arrive{animation:starArrive .32s ease-out}
 @keyframes starArrive{0%{transform:scale(.55) rotate(-18deg)}65%{transform:scale(1.22) rotate(8deg)}100%{transform:translateY(-1px) scale(1.07) rotate(0)}}
 .flying-star{position:fixed;left:0;top:0;z-index:90;pointer-events:none;width:36px;height:36px;background-image:url('goldStar.svg');background-size:contain;background-position:center;background-repeat:no-repeat;filter:drop-shadow(0 0 10px rgba(255,215,0,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.4));will-change:transform,opacity}
-button#resetBtn{margin-top:10px;border:1px solid #555;background:#111;color:#fff;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}
+#resetBtn{position:fixed;top:max(8px,env(safe-area-inset-top));right:calc(max(12px,env(safe-area-inset-right)) + 48px);z-index:10030;width:40px;height:40px;border:0;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+#resetBtn img{width:40px;height:40px;display:block;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}
+#resetBtn:active{transform:translateY(1px)}
 #nextMiniGameBtn{position:absolute;left:50%;bottom:calc(11.8% + 17px);transform:translateX(-50%);z-index:2;width:min(52%,250px);max-width:74vw;border:0;background:transparent;padding:0;cursor:pointer;pointer-events:auto}
 #nextMiniGameBtn img{display:block;width:100%;height:auto;pointer-events:none;user-select:none;-webkit-user-drag:none}
 #nextMiniGameBtn:active{transform:translateX(-50%) translateY(1px)}
@@ -190,8 +192,10 @@ button#resetBtn{margin-top:10px;border:1px solid #555;background:#111;color:#fff
   <div id="status">נמצאו: 0/3</div>
   <div id="syncStatus" class="hidden" aria-live="polite"></div>
   <div id="pushToast" class="hidden" aria-live="polite"></div>
-  <button id="resetBtn">איפוס</button>
 </div>
+<button id="resetBtn" class="hidden" aria-label="איפוס משחק">
+  <img src="restart.png" alt="" aria-hidden="true">
+</button>
 <button id="homeBtn" class="hidden" aria-label="חזרה לגלריה">
   <img src="home.png" alt="" aria-hidden="true">
 </button>
@@ -320,6 +324,7 @@ const galleryScreen=document.getElementById('galleryScreen');
 const galleryGrid=document.getElementById('galleryGrid');
 const startBtn=document.getElementById('startBtn');
 const nextMiniGameBtn=document.getElementById('nextMiniGameBtn');
+const resetBtn=document.getElementById('resetBtn');
 const homeBtn=document.getElementById('homeBtn');
 const startOverlayGif=document.getElementById('startOverlayGif');
 const galleryIntroGif=document.getElementById('galleryIntroGif');
@@ -1081,11 +1086,23 @@ function animateGalleryGifMorph(){
 }
 
 function setHomeButtonVisibility(visible){
- if(!homeBtn)return;
- if(visible&&miniGames.length>1){
-  homeBtn.classList.remove('hidden');
- }else{
-  homeBtn.classList.add('hidden');
+ const showHome=visible&&miniGames.length>1;
+ if(homeBtn){
+  if(showHome){
+   homeBtn.classList.remove('hidden');
+  }else{
+   homeBtn.classList.add('hidden');
+  }
+ }
+ if(resetBtn){
+  if(visible){
+   resetBtn.style.right=showHome
+    ? 'calc(max(12px,env(safe-area-inset-right)) + 48px)'
+    : 'max(12px,env(safe-area-inset-right))';
+   resetBtn.classList.remove('hidden');
+  }else{
+   resetBtn.classList.add('hidden');
+  }
  }
 }
 
@@ -2092,10 +2109,12 @@ window.addEventListener('resize',()=>{
  zoomOffsetY=clamped.y;
  applyZoomTransform();
 });
-document.getElementById('resetBtn').onclick=()=>{
- if(isInputLocked())return;
- resetRoundState();
-};
+if(resetBtn){
+ resetBtn.onclick=()=>{
+  if(isInputLocked())return;
+  resetRoundState();
+ };
+}
 if(nextMiniGameBtn){
  nextMiniGameBtn.onclick=()=>{
   if(isInputLocked())return;
