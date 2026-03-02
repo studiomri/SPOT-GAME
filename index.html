@@ -51,7 +51,8 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 #syncStatus.error{color:#ff9aa8}
 #pushToast{position:fixed;left:50%;top:calc(max(8px,env(safe-area-inset-top)) + 78px);transform:translate(-50%,-12px);z-index:10110;min-width:min(540px,92vw);max-width:94vw;background:rgba(15,15,15,.92);border:1px solid rgba(255,255,255,.34);border-radius:12px;padding:10px 14px;color:#fff;font-weight:800;font-size:15px;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
 #pushToast.active{opacity:1;transform:translate(-50%,0)}
-#starsBar{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 36px);left:50%;width:66.666vw;max-width:860px;transform:translateX(-50%);display:flex;gap:var(--hud-stars-gap);justify-content:center;align-items:center;z-index:40;pointer-events:none}
+#starsBackdrop{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 20px);left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));height:74px;background:url('elips.svg') center/100% 100% no-repeat;z-index:39;pointer-events:none}
+#starsBar{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 36px);left:50%;width:66.666vw;max-width:860px;transform:translateX(-50%);display:flex;gap:var(--hud-stars-gap);justify-content:center;align-items:center;z-index:41;pointer-events:none}
 .star{display:inline-block;width:var(--hud-star-size);height:var(--hud-star-size);background-image:url('greySTAR.svg');background-size:contain;background-position:center;background-repeat:no-repeat;transition:transform .22s ease,filter .22s ease,opacity .22s ease}
 .star.found{background-image:url('goldStar.svg');filter:drop-shadow(0 1px 0 rgba(255,255,255,.25)) drop-shadow(0 3px 6px rgba(255,191,0,.45));transform:translateY(-1px) scale(1.07)}
 .star.arrive{animation:starArrive .32s ease-out}
@@ -174,6 +175,7 @@ button#resetBtn{margin-top:10px;border:1px solid #555;background:#111;color:#fff
 </div>
 
 <div id="app" class="hidden">
+  <div id="starsBackdrop" aria-hidden="true"></div>
   <div id="starsBar" aria-label="מד הבדלים"></div>
   <div id="game">
     <div class="imgbox" id="c1"><div class="zoomLayer" id="z1"><img class="main" id="i1" src="111.png"></div></div>
