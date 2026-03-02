@@ -53,6 +53,7 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 #pushToast.active{opacity:1;transform:translate(-50%,0)}
 #starsBackdrop{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 28px);left:50%;width:96vw;max-width:1292px;transform:translateX(-50%);height:66px;background:url('elips.svg') center/100% 100% no-repeat;z-index:39;pointer-events:none}
 #starsBar{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 46px);left:50%;width:66.666vw;max-width:860px;transform:translateX(-50%);display:flex;gap:var(--hud-stars-gap);justify-content:center;align-items:center;z-index:41;pointer-events:none}
+@media (max-width:899px){#starsBar{top:calc(max(8px,env(safe-area-inset-top)) + 61px);transform:translate(-50%,-50%)}}
 @media (min-width:900px){#starsBackdrop{width:100vw;max-width:none;height:56px}}
 .star{display:inline-block;width:var(--hud-star-size);height:var(--hud-star-size);background-image:url('greySTAR.svg');background-size:contain;background-position:center;background-repeat:no-repeat;transition:transform .22s ease,filter .22s ease,opacity .22s ease}
 .star.found{background-image:url('goldStar.svg');filter:drop-shadow(0 1px 0 rgba(255,255,255,.25)) drop-shadow(0 3px 6px rgba(255,191,0,.45));transform:translateY(-1px) scale(1.07)}
