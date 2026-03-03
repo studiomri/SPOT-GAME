@@ -120,18 +120,6 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 </head>
 <body>
 
-<div id="playerGate">
-  <div class="playerGateCard">
-    <h1 class="playerGateTitle">התחלת משחק</h1>
-    <p class="playerGateHint">הזן שם משתתף כדי להתחיל.</p>
-    <form id="playerForm" class="playerGateForm">
-      <input id="playerNameInput" class="playerGateInput" type="text" maxlength="28" autocomplete="nickname" placeholder="שם משתתף" required>
-      <button id="playerJoinBtn" class="playerGateBtn" type="submit">כניסה</button>
-    </form>
-    <div id="playerGateError" class="playerGateError" aria-live="polite"></div>
-  </div>
-</div>
-
 <div id="startScreen">
   <div class="startCard">
     <div class="mediaWrap"><img src="backneto.png" alt="Time To Play"></div>
@@ -220,82 +208,72 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
   </svg>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const miniGames = [
   {
-    "name": "aba",
-    "image1": "aba.png",
-    "image2": "aba.png",
+    "name": "Mini-game 1",
+    "image1": "kids1.jpg",
+    "image2": "kids2.jpg",
     "differences": [
       {
-        "x": 205,
-        "y": 309,
-        "width": 172,
-        "height": 225
+        "x": 988,
+        "y": 639,
+        "width": 66,
+        "height": 64
       },
       {
-        "x": 790,
-        "y": 498,
-        "width": 154,
-        "height": 205
-      }
-    ]
-  },
-  {
-    "name": "atay",
-    "image1": "atay.png",
-    "image2": "atay.png",
-    "differences": [
-      {
-        "x": 261,
-        "y": 376,
-        "width": 189,
-        "height": 244
+        "x": 699,
+        "y": 488,
+        "width": 58,
+        "height": 76
       },
       {
-        "x": 817,
-        "y": 351,
-        "width": 187,
-        "height": 285
-      }
-    ]
-  },
-  {
-    "name": "amalia",
-    "image1": "amalya.png",
-    "image2": "amalya.png",
-    "differences": [
-      {
-        "x": 276,
-        "y": 398,
-        "width": 192,
-        "height": 248
+        "x": 504,
+        "y": 472,
+        "width": 64,
+        "height": 66
       },
       {
-        "x": 766,
-        "y": 352,
-        "width": 149,
-        "height": 255
-      }
-    ]
-  },
-  {
-    "name": "ilay",
-    "image1": "ilay.png",
-    "image2": "ilay.png",
-    "differences": [
-      {
-        "x": 269,
-        "y": 352,
-        "width": 195,
-        "height": 265
+        "x": 345,
+        "y": 468,
+        "width": 77,
+        "height": 81
       },
       {
-        "x": 781,
-        "y": 319,
-        "width": 188,
-        "height": 277
+        "x": 644,
+        "y": 388,
+        "width": 91,
+        "height": 61
+      },
+      {
+        "x": 829,
+        "y": 151,
+        "width": 63,
+        "height": 60
+      },
+      {
+        "x": 834,
+        "y": 375,
+        "width": 77,
+        "height": 62
+      },
+      {
+        "x": 602,
+        "y": 704,
+        "width": 97,
+        "height": 76
+      },
+      {
+        "x": 100,
+        "y": 339,
+        "width": 77,
+        "height": 77
+      },
+      {
+        "x": 22,
+        "y": 565,
+        "width": 109,
+        "height": 63
       }
     ]
   }
@@ -412,8 +390,8 @@ const SUPABASE_URL='https://cmmsnyecrovyxfzhyywm.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtbXNueWVjcm92eXhmemh5eXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzA2MjEsImV4cCI6MjA4NzgwNjYyMX0.ECt37FWwATG3ZlSoBE6R9OaM31MYuXHpGefXFH7uocg';
 const SUPABASE_TABLE='scores';
 let supportsSessionColumns=true;
-let participantName='';
-let participantJoined=false;
+let participantName='שחקן';
+let participantJoined=true;
 let roundStartedAt=0;
 let sessionStartedAt=0;
 let finalResultsSubmitted=false;
@@ -861,7 +839,7 @@ async function postParticipantResults(final=false){
 }
 
 function submitParticipantResults(final=false){
- postParticipantResults(final).catch(()=>{});
+ return;
 }
 
 function setParticipantUiReady(ready){
@@ -1087,7 +1065,7 @@ function animateGalleryGifMorph(){
 }
 
 function setHomeButtonVisibility(visible){
- const showHome=visible&&miniGames.length>1;
+ const showHome=Boolean(visible);
  if(homeBtn){
   if(showHome){
    homeBtn.classList.remove('hidden');
@@ -1291,10 +1269,6 @@ function showGalleryScreen(options={}){
 
 function startMiniGame(index){
  hideFinalScoresScreen();
- if(!participantJoined){
-  if(playerGateEl)playerGateEl.classList.remove('hidden');
-  return;
- }
  if(galleryMorphTimer){
   clearTimeout(galleryMorphTimer);
   galleryMorphTimer=null;
@@ -1851,15 +1825,7 @@ function maybeCelebrateWin(){
   participantStats.completedRounds=completedMiniGames.size;
  }
  const isFinalRound=!finalResultsSubmitted&&miniGames.length>0&&completedMiniGames.size>=miniGames.length;
- if(isFinalRound){
-  finalResultsSubmitted=true;
-  submitParticipantResults(true);
-  // Do not self-declare winner; verify first finisher from shared scores table.
-  setTimeout(()=>pollLiveWinner(),180);
-  setTimeout(()=>pollLiveWinner(),900);
- }else{
-  submitParticipantResults(false);
- }
+ if(isFinalRound)finalResultsSubmitted=true;
  if(finishConfettiTimer){
   clearTimeout(finishConfettiTimer);
   finishConfettiTimer=null;
@@ -1868,12 +1834,7 @@ function maybeCelebrateWin(){
   playWinMelody();
   showFinishPopup();
   launchConfetti();
-  if(isFinalRound){
-   hideNextMiniGameButton();
-   setSyncStatus('ממתין לשאר המשתתפים לסיום...',false,true);
-  }else{
-   showNextMiniGameButton();
-  }
+  showNextMiniGameButton();
   finishConfettiTimer=null;
  },FINISH_CONFETTI_DELAY_MS);
  if(nextMiniGamePromptTimer){
@@ -2122,17 +2083,17 @@ if(nextMiniGameBtn){
   loadMiniGame(getNextMiniGameIndex());
  };
 }
-registerGroupServiceWorker().catch(()=>{});
-document.addEventListener('visibilitychange',()=>{
- if(!document.hidden){
-  startLiveWinnerRealtime();
-  pollLiveWinner();
- }
-});
-window.addEventListener('beforeunload',()=>{
- stopLiveWinnerSync();
-});
+if(playerGateEl)playerGateEl.classList.add('hidden');
+setParticipantUiReady(true);
+resetParticipantSession();
 loadMiniGame(0);
+if(startScreenEl){
+ startScreenEl.classList.remove('hidden');
+ startScreenEl.classList.remove('morph-out');
+}
+if(galleryScreen)galleryScreen.classList.add('hidden');
+if(appEl)appEl.classList.add('hidden');
+setHomeButtonVisibility(false);
 </script>
 </body>
 </html>
