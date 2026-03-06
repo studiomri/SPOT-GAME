@@ -432,6 +432,9 @@ const moneyAudio=new Audio(moneySoundSrc);
 moneyAudio.preload='auto';
 moneyAudio.setAttribute('playsinline','');
 let moneyAudioUnlocked=false;
+const MONEY_BURST_LAYERS=2;
+const MONEY_BURST_OFFSETS_MS=[0,36];
+const moneyAudioPool=[moneyAudio];
 const GALLERY_MORPH_MS=620;
 let galleryMorphTimer=null;
 let galleryMorphInProgress=false;
@@ -1661,7 +1664,7 @@ function unlockCoinAudio(){
   p.then(()=>{
    moneyAudio.pause();
    moneyAudio.currentTime=0;
-   moneyAudio.volume=0.95;
+   moneyAudio.volume=1;
    moneyAudioUnlocked=true;
   }).catch(()=>{
    // fallback unlock path
@@ -1672,42 +1675,51 @@ function unlockCoinAudio(){
      moneyAudio.pause();
      moneyAudio.currentTime=0;
      moneyAudio.muted=false;
-     moneyAudio.volume=0.95;
+     moneyAudio.volume=1;
      moneyAudioUnlocked=true;
     }).catch(()=>{
      moneyAudio.muted=false;
-     moneyAudio.volume=0.95;
+     moneyAudio.volume=1;
     });
    }else{
     moneyAudio.muted=false;
-    moneyAudio.volume=0.95;
+    moneyAudio.volume=1;
    }
   });
  }else{
   moneyAudio.pause();
   moneyAudio.currentTime=0;
-  moneyAudio.volume=0.95;
+  moneyAudio.volume=1;
   moneyAudioUnlocked=true;
  }
+}
+
+function getMoneyAudioLayer(index){
+ const existing=moneyAudioPool[index];
+ if(existing)return existing;
+ const layer=new Audio(moneySoundSrc);
+ layer.preload='auto';
+ layer.setAttribute('playsinline','');
+ moneyAudioPool[index]=layer;
+ return layer;
 }
 
 function playCoinBurst(totalMs){
  try{
   if(!moneyAudioUnlocked)unlockCoinAudio();
-  moneyAudio.currentTime=0;
-  moneyAudio.volume=0.95;
-  const p=moneyAudio.play();
-  if(p&&typeof p.catch==='function'){
-   p.catch(()=>{
-    setTimeout(()=>{
-     try{
-      moneyAudio.currentTime=0;
-      moneyAudio.volume=0.95;
-      const p2=moneyAudio.play();
-      if(p2&&typeof p2.catch==='function')p2.catch(()=>{});
-     }catch(_){ }
-    },50);
-   });
+  const layers=Math.max(1,MONEY_BURST_LAYERS);
+  for(let i=0;i<layers;i++){
+   const offset=MONEY_BURST_OFFSETS_MS[i]||0;
+   const layer=getMoneyAudioLayer(i);
+   setTimeout(()=>{
+    try{
+     layer.currentTime=0;
+     // Two layers (~1.5x perceived loudness without WebAudio gain).
+     layer.volume=i===0?1:0.55;
+     const p=layer.play();
+     if(p&&typeof p.catch==='function')p.catch(()=>{});
+    }catch(_){ }
+   },offset);
   }
  }catch(_){ }
 }
