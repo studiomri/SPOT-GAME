@@ -317,7 +317,7 @@ let found=[],mistakes=0;
 let gameFinished=false;
 const INITIAL_COINS=10;
 const HINT_COST=2;
-const HINT_MARKER_MS=4000;
+const HINT_MARKER_MS=8000;
 const START_COIN_FLIGHT_MS=744;
 const START_COIN_STAGGER_MS=58;
 let coins=INITIAL_COINS;
@@ -386,6 +386,7 @@ let zoomOffsetY=0;
 const ZOOM_MIN=1;
 const ZOOM_MAX=3;
 const PAN_MOVE_THRESHOLD=6;
+const ZOOM_RESET_MS=320;
 const pinchPointers=new Map();
 let pinchStartDistance=0;
 let pinchStartCenter=null;
@@ -398,6 +399,7 @@ let panStartY=0;
 let panStartOffsetX=0;
 let panStartOffsetY=0;
 let touchGestureWasPan=false;
+let zoomResetTimer=null;
 let oopsResetTimer=null;
 const finishBackdrop=document.getElementById('finishBackdrop');
 const oopsBackdrop=document.getElementById('oopsBackdrop');
@@ -1833,7 +1835,7 @@ function buyHint(){
  if(hintIndex<0)return;
  coins=Math.max(0,coins-HINT_COST);
  if(zoomScale>ZOOM_MIN){
-  resetImageZoom();
+  smoothResetImageZoom();
  }
  triggerCoinBagShake();
  showHintForDifference(differences[hintIndex]);
@@ -1883,7 +1885,42 @@ function applyZoomTransform(){
  if(z2)z2.style.transform=tr;
 }
 
+function clearZoomResetTransition(){
+ if(zoomResetTimer){
+  clearTimeout(zoomResetTimer);
+  zoomResetTimer=null;
+ }
+ [z1,z2].forEach(layer=>{
+  if(!layer)return;
+  layer.style.transition='';
+ });
+}
+
+function smoothResetImageZoom(){
+ if(zoomScale<=ZOOM_MIN&&Math.abs(zoomOffsetX)<0.01&&Math.abs(zoomOffsetY)<0.01){
+  resetImageZoom();
+  return;
+ }
+ pinchPointers.clear();
+ panPointerId=null;
+ touchGestureWasPan=false;
+ pinchStartDistance=0;
+ pinchStartCenter=null;
+ [z1,z2].forEach(layer=>{
+  if(!layer)return;
+  layer.style.transition='transform '+ZOOM_RESET_MS+'ms cubic-bezier(.22,.61,.36,1)';
+ });
+ zoomScale=1;
+ zoomOffsetX=0;
+ zoomOffsetY=0;
+ applyZoomTransform();
+ zoomResetTimer=setTimeout(()=>{
+  clearZoomResetTransition();
+ },ZOOM_RESET_MS+34);
+}
+
 function resetImageZoom(){
+ clearZoomResetTransition();
  zoomScale=1;
  zoomOffsetX=0;
  zoomOffsetY=0;
@@ -2386,6 +2423,7 @@ function processTap(img,clientX,clientY){
 
 function onImagePointerDown(e){
  if(e.pointerType!=='touch')return;
+ clearZoomResetTransition();
  activeTouchPointers.add(e.pointerId);
  pinchPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(activeTouchPointers.size>1){
