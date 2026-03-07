@@ -141,9 +141,20 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 #oopsTimer svg{display:block;width:100%;height:100%;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))}
 @keyframes oopsBounce{0%{transform:translate(-50%,-50%) scale(.2)}32%{transform:translate(-50%,-50%) scale(1.12)}55%{transform:translate(-50%,-50%) scale(1.02)}74%{transform:translate(-50%,-50%) scale(1.09)}88%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1.12)}}
 @media (prefers-reduced-motion:reduce){#startScreen,#galleryScreen,#galleryIntroGif,.gif-morph-clone{transition:none}#startScreen.morph-out{opacity:0;transform:none;filter:none}#galleryScreen{filter:none}#galleryScreen.morph-in{opacity:1}}
+#portraitOnlyOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:20000;background:rgba(0,0,0,.88);padding:24px}
+#portraitOnlyOverlay .portraitOnlyCard{max-width:min(520px,92vw);border:1px solid rgba(255,255,255,.32);border-radius:16px;background:rgba(15,15,15,.9);padding:22px 18px;color:#fff;font-size:clamp(18px,4.2vw,26px);font-weight:800;line-height:1.35;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.42)}
+body.force-portrait{overflow:hidden}
+body.force-portrait > :not(#portraitOnlyOverlay){display:none!important}
+body.force-portrait #portraitOnlyOverlay{display:flex!important}
+
 </style>
 </head>
 <body>
+
+<div id="portraitOnlyOverlay" class="hidden" aria-live="polite">
+  <div class="portraitOnlyCard">למשחק יש לסובב את הטלפון למצב אנכי</div>
+</div>
+
 
 <div id="startScreen">
   <div class="startCard">
@@ -365,6 +376,7 @@ const finalScoresHomeBtn=document.getElementById('finalScoresHomeBtn');
 const winnerScreen=document.getElementById('winnerScreen');
 const winnerNameEl=document.getElementById('winnerName');
 const winnerContinueBtn=document.getElementById('winnerContinueBtn');
+const portraitOnlyOverlay=document.getElementById('portraitOnlyOverlay');
 let syncStatusTimer=null;
 let finalScoresTimer=null;
 let currentMiniGameIndex=0;
@@ -1174,7 +1186,7 @@ function positionHintButton(){
  if(gameEl){
   const rect=gameEl.getBoundingClientRect();
   if(rect.height>0){
-   nextTop=rect.bottom+7;
+   nextTop=rect.bottom-7;
   }
  }
  const safeTop=Math.max(0,Math.min(nextTop,maxTop));
@@ -1309,6 +1321,7 @@ function goToGalleryFromGame(){
  galleryScreen.classList.remove('hidden');
  galleryScreen.classList.add('morph-in');
  setHomeButtonVisibility(false);
+updatePortraitOnlyMode();
 }
 
 function showGalleryScreen(options={}){
@@ -1389,6 +1402,17 @@ function startMiniGame(index){
     playStartCoinIntroAnimation();
    });
   });
+ }
+}
+
+function updatePortraitOnlyMode(){
+ const shortSide=Math.min(window.innerWidth,window.innerHeight);
+ const isMobileViewport=shortSide<=900;
+ const isLandscape=window.innerWidth>window.innerHeight;
+ const shouldForce=isMobileViewport&&isLandscape;
+ document.body.classList.toggle('force-portrait',shouldForce);
+ if(portraitOnlyOverlay){
+  portraitOnlyOverlay.classList.toggle('hidden',!shouldForce);
  }
 }
 
@@ -2519,7 +2543,9 @@ window.addEventListener('resize',()=>{
  zoomOffsetY=clamped.y;
  applyZoomTransform();
  positionHintButton();
+ updatePortraitOnlyMode();
 });
+window.addEventListener('orientationchange',updatePortraitOnlyMode);
 if(resetBtn){
  resetBtn.onclick=()=>{
   if(isInputLocked())return;
@@ -2548,6 +2574,7 @@ if(startScreenEl){
 if(galleryScreen)galleryScreen.classList.add('hidden');
 if(appEl)appEl.classList.add('hidden');
 setHomeButtonVisibility(false);
+updatePortraitOnlyMode();
 </script>
 </body>
 </html>
