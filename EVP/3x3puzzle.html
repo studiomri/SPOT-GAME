@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      :root {
+        --board-width: min(96vw, calc((100vh - 112px) * 3 / 4), 720px);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        min-height: 100%;
+        background: #000;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 60px 12px 12px;
+        overflow: hidden;
+        font-family: "Assistant", "Rubik", sans-serif;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .app {
+        width: var(--board-width);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #resetBtn {
+        position: fixed;
+        top: max(8px, env(safe-area-inset-top));
+        right: calc(max(12px, env(safe-area-inset-right)) + 48px);
+        z-index: 10030;
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      #resetBtn img {
+        width: 40px;
+        height: 40px;
+        display: block;
+        object-fit: contain;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      #resetBtn:active {
+        transform: translateY(1px);
+      }
+
+      #homeBtn {
+        position: fixed;
+        top: max(8px, env(safe-area-inset-top));
+        right: max(12px, env(safe-area-inset-right));
+        z-index: 10030;
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      #homeBtn img {
+        width: 40px;
+        height: 40px;
+        display: block;
+        object-fit: contain;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      #homeBtn:active {
+        transform: translateY(1px);
+      }
+
+      .board {
+        direction: ltr;
+        width: var(--board-width);
+        aspect-ratio: 3 / 4;
+        border-radius: 12px;
+        padding: 6px;
+        background: #1a1a1a;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .tile,
+      .empty {
+        border-radius: 10px;
+      }
+
+      .tile {
+        border: 0;
+        padding: 0;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        transition: transform 120ms ease;
+      }
+
+      .tile:hover {
+        transform: scale(1.02);
+      }
+
+      .empty {
+        background: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 7px,
+          rgba(255, 255, 255, 0.12) 7px,
+          rgba(255, 255, 255, 0.12) 14px
+        );
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      #confettiCanvas {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 10080;
+      }
+
+      #finishBackdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10042;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      #finishBackdrop.active {
+        opacity: 1;
+      }
+
+      #finishPopup {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: min(88.4vw, 468px);
+        max-width: 90vw;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.75);
+        z-index: 10045;
+        filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.8));
+        pointer-events: none;
+      }
+
+      #finishPopup.active {
+        opacity: 1;
+        animation: popupBounce 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+      }
+
+      #finishPopupImg {
+        display: block;
+        width: 100%;
+        height: auto;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      @keyframes popupBounce {
+        0% {
+          transform: translate(-50%, -50%) scale(0.2);
+        }
+        32% {
+          transform: translate(-50%, -50%) scale(1.12);
+        }
+        55% {
+          transform: translate(-50%, -50%) scale(1.02);
+        }
+        74% {
+          transform: translate(-50%, -50%) scale(1.09);
+        }
+        88% {
+          transform: translate(-50%, -50%) scale(1.1);
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1.12);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="board" id="board"></section>
+    </main>
+
+    <button id="resetBtn" aria-label="איפוס משחק">
+      <img src="restart.png" alt="" aria-hidden="true" />
+    </button>
+    <button id="homeBtn" aria-label="מסך בית">
+      <img src="home.png" alt="" aria-hidden="true" />
+    </button>
+
+    <canvas id="confettiCanvas" class="hidden"></canvas>
+    <div id="finishBackdrop" class="hidden" aria-hidden="true"></div>
+    <div id="finishPopup" class="hidden" aria-hidden="true">
+      <img id="finishPopupImg" src="finish.svg" alt="finish" />
+    </div>
+
+    <script>
+      const ROWS = 4;
+      const COLS = 3;
+      const LAST_INDEX = ROWS * COLS - 1;
+      const MISSING_INDEX = LAST_INDEX;
+      const DEFAULT_IMAGE = "pic4puzzle.png";
+
+      const boardEl = document.getElementById("board");
+      const resetBtn = document.getElementById("resetBtn");
+      const homeBtn = document.getElementById("homeBtn");
+      const confettiCanvas = document.getElementById("confettiCanvas");
+      const finishBackdrop = document.getElementById("finishBackdrop");
+      const finishPopup = document.getElementById("finishPopup");
+
+      let imageURL = DEFAULT_IMAGE;
+      let board = [];
+      let gameFinished = false;
+      let confettiAnimationId = null;
+      let winDelayTimer = null;
+      const FINISH_DELAY_MS = 1000;
+
+      const winAudio = new Audio("money.wav");
+      winAudio.preload = "auto";
+      winAudio.setAttribute("playsinline", "");
+
+      function createSolvedBoard() {
+        return Array.from({ length: ROWS * COLS }, (_, i) => i);
+      }
+
+      function indexToRC(index) {
+        return { r: Math.floor(index / COLS), c: index % COLS };
+      }
+
+      function isAdjacent(i, j) {
+        const a = indexToRC(i);
+        const b = indexToRC(j);
+        return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
+      }
+
+      function shuffleFromSolved(steps = 280) {
+        let state = createSolvedBoard();
+        let empty = LAST_INDEX;
+
+        for (let i = 0; i < steps; i += 1) {
+          const candidates = [];
+          for (let idx = 0; idx < state.length; idx += 1) {
+            if (isAdjacent(idx, empty)) {
+              candidates.push(idx);
+            }
+          }
+
+          const pick = candidates[Math.floor(Math.random() * candidates.length)];
+          [state[pick], state[empty]] = [state[empty], state[pick]];
+          empty = pick;
+        }
+
+        return state;
+      }
+
+      function isSolved(state) {
+        for (let i = 0; i < state.length; i += 1) {
+          if (i === MISSING_INDEX) {
+            continue;
+          }
+
+          if (state[i] !== i) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      function countInversions(state) {
+        const tiles = state.filter((tile) => tile !== LAST_INDEX);
+        let inversions = 0;
+
+        for (let i = 0; i < tiles.length; i += 1) {
+          for (let j = i + 1; j < tiles.length; j += 1) {
+            if (tiles[i] > tiles[j]) {
+              inversions += 1;
+            }
+          }
+        }
+
+        return inversions;
+      }
+
+      function isSolvable(state) {
+        const inversions = countInversions(state);
+
+        if (COLS % 2 === 1) {
+          return inversions % 2 === 0;
+        }
+
+        const emptyPos = state.indexOf(LAST_INDEX);
+        const emptyRowFromBottom = ROWS - Math.floor(emptyPos / COLS);
+
+        if (emptyRowFromBottom % 2 === 0) {
+          return inversions % 2 === 1;
+        }
+
+        return inversions % 2 === 0;
+      }
+
+      function createPlayableBoard() {
+        let nextBoard = shuffleFromSolved();
+        while (isSolved(nextBoard) || !isSolvable(nextBoard)) {
+          nextBoard = shuffleFromSolved();
+        }
+        return nextBoard;
+      }
+
+      function playWinSound() {
+        try {
+          winAudio.currentTime = 0;
+          winAudio.volume = 0.85;
+          const p = winAudio.play();
+          if (p && typeof p.catch === "function") {
+            p.catch(() => {});
+          }
+        } catch (_) {}
+      }
+
+      function showFinishPopup() {
+        if (finishBackdrop) {
+          finishBackdrop.classList.remove("hidden");
+          finishBackdrop.classList.remove("active");
+          void finishBackdrop.offsetWidth;
+          finishBackdrop.classList.add("active");
+        }
+
+        if (finishPopup) {
+          finishPopup.classList.remove("hidden");
+          finishPopup.classList.remove("active");
+          void finishPopup.offsetWidth;
+          finishPopup.classList.add("active");
+        }
+      }
+
+      function hideFinishPopup() {
+        if (finishBackdrop) {
+          finishBackdrop.classList.remove("active");
+          finishBackdrop.classList.add("hidden");
+        }
+
+        if (finishPopup) {
+          finishPopup.classList.remove("active");
+          finishPopup.classList.add("hidden");
+        }
+      }
+
+      function stopConfetti() {
+        if (confettiAnimationId) {
+          cancelAnimationFrame(confettiAnimationId);
+          confettiAnimationId = null;
+        }
+
+        const ctx = confettiCanvas.getContext("2d");
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        confettiCanvas.classList.add("hidden");
+      }
+
+      function launchConfetti() {
+        stopConfetti();
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        confettiCanvas.width = width;
+        confettiCanvas.height = height;
+        confettiCanvas.classList.remove("hidden");
+
+        const ctx = confettiCanvas.getContext("2d");
+        const colors = ["#ff4d4d", "#ffd84d", "#4dd2ff", "#7dff7d", "#ff7df7"];
+        const centerX = width * 0.5;
+        const centerY = height * 0.5;
+
+        const pieces = Array.from({ length: 220 }, () => {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 4 + Math.random() * 8;
+          return {
+            x: centerX,
+            y: centerY,
+            r: 4 + Math.random() * 6,
+            c: colors[Math.floor(Math.random() * colors.length)],
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            rot: Math.random() * Math.PI * 2,
+            spin: -0.25 + Math.random() * 0.5,
+            life: 70 + Math.random() * 35,
+          };
+        });
+
+        const endAt = performance.now() + 2200;
+
+        function frame(ts) {
+          ctx.clearRect(0, 0, width, height);
+          let alive = false;
+
+          pieces.forEach((p) => {
+            if (p.life <= 0) return;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vx *= 0.992;
+            p.vy = p.vy * 0.992 + 0.05;
+            p.rot += p.spin;
+            p.life -= 1;
+
+            if (p.x > -60 && p.x < width + 60 && p.y > -60 && p.y < height + 80 && p.life > 0) {
+              alive = true;
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.c;
+            ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 1.4);
+            ctx.restore();
+          });
+
+          if (ts < endAt || alive) {
+            confettiAnimationId = requestAnimationFrame(frame);
+          } else {
+            stopConfetti();
+          }
+        }
+
+        confettiAnimationId = requestAnimationFrame(frame);
+      }
+
+      function triggerWin() {
+        if (gameFinished) return;
+        gameFinished = true;
+
+        if (winDelayTimer) {
+          clearTimeout(winDelayTimer);
+        }
+
+        winDelayTimer = setTimeout(() => {
+          playWinSound();
+          showFinishPopup();
+          launchConfetti();
+          winDelayTimer = null;
+        }, FINISH_DELAY_MS);
+      }
+
+      function render() {
+        boardEl.innerHTML = "";
+
+        for (let pos = 0; pos < board.length; pos += 1) {
+          const tile = board[pos];
+
+          if (tile === LAST_INDEX) {
+            const empty = document.createElement("div");
+            empty.className = "empty";
+            boardEl.appendChild(empty);
+            continue;
+          }
+
+          const btn = document.createElement("button");
+          btn.className = "tile";
+
+          const sourceR = Math.floor(tile / COLS);
+          const sourceC = tile % COLS;
+
+          btn.style.backgroundImage = `url(${imageURL})`;
+          btn.style.backgroundSize = `${COLS * 100}% ${ROWS * 100}%`;
+          btn.style.backgroundPosition = `${(sourceC / (COLS - 1)) * 100}% ${(sourceR / (ROWS - 1)) * 100}%`;
+          btn.addEventListener("click", () => onTileClick(pos));
+
+          boardEl.appendChild(btn);
+        }
+
+        if (!gameFinished && isSolved(board)) {
+          triggerWin();
+        }
+      }
+
+      function onTileClick(position) {
+        if (gameFinished) return;
+
+        const emptyPos = board.indexOf(LAST_INDEX);
+        if (!isAdjacent(position, emptyPos)) {
+          return;
+        }
+
+        [board[position], board[emptyPos]] = [board[emptyPos], board[position]];
+        render();
+      }
+
+      function startPuzzle() {
+        gameFinished = false;
+        if (winDelayTimer) {
+          clearTimeout(winDelayTimer);
+          winDelayTimer = null;
+        }
+        hideFinishPopup();
+        stopConfetti();
+        board = createPlayableBoard();
+        render();
+      }
+
+      resetBtn.addEventListener("click", startPuzzle);
+      homeBtn.addEventListener("click", () => {
+        window.location.href = "index.html";
+      });
+      startPuzzle();
+    </script>
+  </body>
+</html>

@@ -1,1 +1,95 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EVP - בחירת משחק</title>
+    <style>
+      :root {
+        --bg: #f5f3ee;
+        --card: #ffffff;
+        --ink: #1f2937;
+        --accent: #0f766e;
+        --accent-2: #b45309;
+        --line: #d6d3d1;
+      }
 
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Assistant", "Heebo", sans-serif;
+        background: radial-gradient(circle at top, #fff7ed 0%, var(--bg) 60%);
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .panel {
+        width: min(92vw, 560px);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+      }
+
+      p {
+        margin: 0 0 20px;
+        color: #4b5563;
+      }
+
+      .games {
+        display: grid;
+        gap: 12px;
+      }
+
+      .game-btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 14px 16px;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-align: right;
+      }
+
+      .game-btn:hover {
+        filter: brightness(1.06);
+      }
+
+      .game-btn.puzzle {
+        background: linear-gradient(120deg, #0f766e, #14b8a6);
+      }
+
+      .game-btn.coins {
+        background: linear-gradient(120deg, #b45309, #f59e0b);
+      }
+
+      .game-btn.waldo {
+        background: linear-gradient(120deg, #be123c, #f43f5e);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="panel">
+      <h1>EVP - מסך פתיחה</h1>
+      <p>בחר משחק:</p>
+      <div class="games">
+        <button class="game-btn puzzle" onclick="location.href='3x3puzzle.html'">פאזל 3x3</button>
+        <button class="game-btn coins" onclick="location.href='coins.html'">חפש את ההבדלים</button>
+        <button class="game-btn waldo" onclick="location.href='gameWALD.html'">Waldo Hunt</button>
+      </div>
+    </main>
+  </body>
+</html>
