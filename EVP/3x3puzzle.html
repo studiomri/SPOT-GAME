@@ -301,15 +301,22 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
         }
       }
 
+      function unlockAllGameAudio() {
+        try {
+          unlockWinAudio();
+        } catch (_) {}
+      }
+
       function bindFirstInteractionAudioUnlock() {
         if (firstInteractionAudioUnlockBound) return;
         firstInteractionAudioUnlockBound = true;
 
         const unlockOnInteraction = () => {
-          unlockWinAudio();
+          unlockAllGameAudio();
         };
 
         window.addEventListener("pointerdown", unlockOnInteraction, { once: true, passive: true });
+        window.addEventListener("touchstart", unlockOnInteraction, { once: true, passive: true });
         window.addEventListener("touchend", unlockOnInteraction, { once: true, passive: true });
         window.addEventListener("keydown", unlockOnInteraction, { once: true });
       }
@@ -405,6 +412,7 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
       function playWinSound() {
         try {
           if (!winAudioUnlocked) unlockWinAudio();
+          winAudio.muted = false;
           winAudio.currentTime = 0;
           winAudio.volume = 0.85;
           const p = winAudio.play();
@@ -592,6 +600,7 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
       }
 
       bindFirstInteractionAudioUnlock();
+      unlockAllGameAudio();
       resetBtn.addEventListener("click", startPuzzle);
       homeBtn.addEventListener("click", () => {
         window.location.href = "index.html?home=1";
