@@ -212,6 +212,34 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
         -webkit-user-drag: none;
       }
 
+      #finishEndBtn {
+        position: absolute;
+        left: 50%;
+        bottom: calc(11.8% + 17px);
+        transform: translateX(-50%);
+        z-index: 2;
+        width: min(52%, 250px);
+        max-width: 74vw;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      #finishEndBtn img {
+        display: block;
+        width: 100%;
+        height: auto;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      #finishEndBtn:active {
+        transform: translateX(-50%) translateY(1px);
+      }
+
       @keyframes popupBounce {
         0% {
           transform: translate(-50%, -50%) scale(0.2);
@@ -252,6 +280,9 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
     <div id="finishBackdrop" class="hidden" aria-hidden="true"></div>
     <div id="finishPopup" class="hidden" aria-hidden="true">
       <img id="finishPopupImg" src="finish.svg" alt="finish" />
+      <button id="finishEndBtn" type="button" aria-label="סיום" title="סיום">
+        <img src="end.svg" alt="סיום" />
+      </button>
     </div>
 
     <script>
@@ -267,6 +298,7 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
       const confettiCanvas = document.getElementById("confettiCanvas");
       const finishBackdrop = document.getElementById("finishBackdrop");
       const finishPopup = document.getElementById("finishPopup");
+      const finishEndBtn = document.getElementById("finishEndBtn");
 
       let imageURL = DEFAULT_IMAGE;
       let board = [];
@@ -605,6 +637,11 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
       homeBtn.addEventListener("click", () => {
         window.location.href = "index.html?home=1";
       });
+      if (finishEndBtn) {
+        finishEndBtn.addEventListener("click", () => {
+          window.location.href = "index.html?home=1";
+        });
+      }
       startPuzzle();
     </script>
   </body>
