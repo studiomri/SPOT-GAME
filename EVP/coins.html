@@ -518,7 +518,7 @@ let pendingStartCoinIntro=false;
 let deferredCoinBurstPending=false;
 let deferredCoinBurstTimer=null;
 let deferredCoinBurstAttempts=0;
-const DEFERRED_COIN_BURST_MAX_ATTEMPTS=8;
+const DEFERRED_COIN_BURST_MAX_ATTEMPTS=30;
 const DEFERRED_COIN_BURST_RETRY_MS=120;
 const LIVE_WINNER_POLL_MS=2200;
 const GROUP_SESSION_PARAM_KEYS=['session','group','match'];
@@ -1808,18 +1808,34 @@ function unlockCoinAudio(){
     }).catch(()=>{
      moneyAudio.muted=false;
      moneyAudio.volume=1;
+     if(!moneyAudioUnlocked)queueDeferredCoinBurst();
     });
    }else{
+    const couldPlay=!moneyAudio.paused||moneyAudio.currentTime>0;
     moneyAudio.muted=false;
     moneyAudio.volume=1;
+    if(couldPlay){
+     moneyAudio.pause();
+     moneyAudio.currentTime=0;
+     moneyAudioUnlocked=true;
+     flushDeferredCoinBurst();
+    }else{
+     queueDeferredCoinBurst();
+    }
    }
   });
  }else{
-  moneyAudio.pause();
-  moneyAudio.currentTime=0;
+  const couldPlay=!moneyAudio.paused||moneyAudio.currentTime>0;
+  moneyAudio.muted=false;
   moneyAudio.volume=1;
-  moneyAudioUnlocked=true;
-  flushDeferredCoinBurst();
+  if(couldPlay){
+   moneyAudio.pause();
+   moneyAudio.currentTime=0;
+   moneyAudioUnlocked=true;
+   flushDeferredCoinBurst();
+  }else{
+   queueDeferredCoinBurst();
+  }
  }
 }
 
@@ -1852,13 +1868,15 @@ function flushDeferredCoinBurst(){
   playCoinBurstLayers();
   return;
  }
- if(deferredCoinBurstAttempts>=DEFERRED_COIN_BURST_MAX_ATTEMPTS)return;
  if(deferredCoinBurstTimer)return;
- deferredCoinBurstAttempts+=1;
+ if(deferredCoinBurstAttempts<DEFERRED_COIN_BURST_MAX_ATTEMPTS){
+  deferredCoinBurstAttempts+=1;
+ }
+ const delay=deferredCoinBurstAttempts>=DEFERRED_COIN_BURST_MAX_ATTEMPTS?500:DEFERRED_COIN_BURST_RETRY_MS;
  deferredCoinBurstTimer=setTimeout(()=>{
   deferredCoinBurstTimer=null;
   flushDeferredCoinBurst();
- },DEFERRED_COIN_BURST_RETRY_MS);
+ },delay);
 }
 
 function playCoinBurstLayers(){
@@ -1876,6 +1894,8 @@ function playCoinBurstLayers(){
      p.catch(()=>{
       if(!moneyAudioUnlocked)queueDeferredCoinBurst();
      });
+    }else if(layer.paused&&!moneyAudioUnlocked){
+     queueDeferredCoinBurst();
     }
    }catch(_){
     if(!moneyAudioUnlocked)queueDeferredCoinBurst();
