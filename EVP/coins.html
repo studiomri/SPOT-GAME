@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
 <title>חפש את ההבדלים</title>
 <style>
-body{font-family:Arial;margin:0;background:#000;color:#fff;text-align:center}
+html,body{width:100%;min-height:100%;}
+body{font-family:Arial;margin:0;width:100%;min-height:100dvh;background:#ff3344 url('redback.png') center/cover no-repeat;color:#fff;text-align:center}
 .hidden{display:none!important}
 :root{--hud-stars-gap:8px;--hud-stars-count:10;--hud-star-size:clamp(16px,calc((66.666vw - ((var(--hud-stars-count) - 1) * var(--hud-stars-gap))) / var(--hud-stars-count)),30.6px);--image-native-width:1200;--image-native-height:900}
-#startScreen{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;padding:0;z-index:130;opacity:1;transform:scale(1);filter:blur(0);transition:opacity .62s cubic-bezier(.22,.61,.36,1),transform .62s cubic-bezier(.22,.61,.36,1),filter .62s cubic-bezier(.22,.61,.36,1);will-change:opacity,transform,filter;transform-origin:50% 50%}
-.startCard{position:relative;width:100vw;height:100vh;border:0;border-radius:0;overflow:hidden;background:#000}
-.mediaWrap{width:100%;height:100%;background:#000}
+#startScreen{position:fixed;inset:0;background:#ff3344 url('redback.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;padding:0;z-index:130;opacity:1;transform:scale(1);filter:blur(0);transition:opacity .62s cubic-bezier(.22,.61,.36,1),transform .62s cubic-bezier(.22,.61,.36,1),filter .62s cubic-bezier(.22,.61,.36,1);will-change:opacity,transform,filter;transform-origin:50% 50%}
+.startCard{position:relative;width:100vw;height:100vh;border:0;border-radius:0;overflow:hidden;background:#ff3344 url('redback.png') center/cover no-repeat}
+.mediaWrap{width:100%;height:100%;background:#ff3344 url('redback.png') center/cover no-repeat}
 .mediaWrap video,.mediaWrap img{width:100%;height:100%;object-fit:cover}
 .startContent{position:absolute;left:50%;top:66.666%;transform:translate(-50%,-100%);padding:0;z-index:20;display:flex;justify-content:center;align-items:center;pointer-events:auto}
 .startBtn{position:relative;z-index:21;border:0;background:transparent;padding:0;cursor:pointer;line-height:0;transition:transform .12s ease}
@@ -71,7 +72,7 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 #buyHintBtn img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}
 #buyHintBtn:active{transform:translateY(1px)}
 #buyHintBtn:disabled{opacity:.42;cursor:not-allowed;transform:none}
-#status{position:fixed;left:50%;top:calc(max(8px,env(safe-area-inset-top)) + 140px);transform:translateX(-50%);width:min(56vw,280px);max-width:74vw;min-height:58px;padding:0 14%;display:flex;align-items:center;justify-content:center;background:url('name.svg') center/100% 100% no-repeat;color:#fff;font-weight:900;font-size:clamp(22px,4.8vw,38px);line-height:1;text-shadow:0 2px 3px rgba(0,0,0,.7),0 0 10px rgba(0,0,0,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:10020;pointer-events:none}
+#status{display:none!important}
 #syncStatus{min-height:20px;margin-top:6px;font-weight:700;font-size:13px;color:#9fe3b1;opacity:.95}
 #syncStatus.error{color:#ff9aa8}
 #pushToast{position:fixed;left:50%;top:calc(max(8px,env(safe-area-inset-top)) + 78px);transform:translate(-50%,-12px);z-index:10110;min-width:min(540px,92vw);max-width:94vw;background:rgba(15,15,15,.92);border:1px solid rgba(255,255,255,.34);border-radius:12px;padding:10px 14px;color:#fff;font-weight:800;font-size:15px;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
@@ -94,7 +95,7 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 #homeBtn{position:fixed;top:max(8px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:10030;width:40px;height:40px;border:0;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #homeBtn img{width:40px;height:40px;display:block;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}
 #homeBtn:active{transform:translateY(1px)}
-#galleryScreen{position:fixed;inset:0;background:#000 url('backneto.png') center/cover no-repeat;z-index:120;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;filter:blur(18px) saturate(1.15);transition:opacity .62s cubic-bezier(.22,.61,.36,1),filter .62s cubic-bezier(.22,.61,.36,1);will-change:opacity,filter;pointer-events:none}
+#galleryScreen{position:fixed;inset:0;background:#ff3344 url('redback.png') center/cover no-repeat;z-index:120;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;filter:blur(18px) saturate(1.15);transition:opacity .62s cubic-bezier(.22,.61,.36,1),filter .62s cubic-bezier(.22,.61,.36,1);will-change:opacity,filter;pointer-events:none}
 #startScreen.morph-out{opacity:0;transform:scale(1.14);filter:blur(22px) saturate(.95);pointer-events:none}
 #galleryScreen.morph-in{opacity:1;filter:blur(0) saturate(1);pointer-events:auto}
 .galleryPanel{width:min(960px,94vw);max-height:92vh;overflow:auto;background:transparent;border:none;border-radius:14px;padding:14px}
@@ -126,7 +127,7 @@ img.main{width:100%;height:100%;object-fit:contain;touch-action:none}
 .winnerName{margin:0 0 14px;font-size:34px;line-height:1.15;font-weight:900;color:#fff}
 .winnerHint{margin:0 0 16px;font-size:15px;color:#e8e8e8}
 #winnerContinueBtn{border:1px solid #777;background:#101010;color:#fff;border-radius:999px;padding:10px 18px;font-weight:800;cursor:pointer}
-#singleEndScreen{position:fixed;inset:0;z-index:10170;background:#000 url('backneto.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;padding:18px}
+#singleEndScreen{position:fixed;inset:0;z-index:10170;background:#ff3344 url('redback.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;padding:18px}
 .singleEndPanel{position:relative;width:min(560px,92vw);max-width:92vw}
 #singleEndGreeting{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 26px rgba(0,0,0,.55));pointer-events:none;user-select:none;-webkit-user-drag:none}
 #singleEndNamePlate{display:none}
@@ -350,7 +351,7 @@ body.force-portrait #portraitOnlyOverlay{display:flex!important}
   <svg viewBox="0 0 240 240" role="presentation">
     <circle cx="120" cy="120" r="108" fill="#0b0b0b"/>
     <circle cx="120" cy="120" r="88" stroke="#2a2a2a" stroke-width="14" fill="none"/>
-    <circle id="oopsTimerProgress" cx="120" cy="120" r="88" stroke="#e179a5" stroke-width="18" fill="none" stroke-linecap="round" stroke-dasharray="552.92" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
+    <circle id="oopsTimerProgress" cx="120" cy="120" r="88" stroke="#ea964d" stroke-width="18" fill="none" stroke-linecap="round" stroke-dasharray="552.92" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
     <text id="oopsTimerText" x="120" y="122" text-anchor="middle" dominant-baseline="middle" font-size="44" fill="#fff" font-family="Arial" font-weight="500">00:20</text>
   </svg>
 </div>
@@ -510,6 +511,11 @@ let galleryGifMorphCloneEl=null;
 let galleryGifMorphCleanupTimer=null;
 let startActionLock=false;
 let pendingStartCoinIntro=false;
+let deferredCoinBurstPending=false;
+let deferredCoinBurstTimer=null;
+let deferredCoinBurstAttempts=0;
+const DEFERRED_COIN_BURST_MAX_ATTEMPTS=8;
+const DEFERRED_COIN_BURST_RETRY_MS=120;
 const LIVE_WINNER_POLL_MS=2200;
 const GROUP_SESSION_PARAM_KEYS=['session','group','match'];
 const GROUP_SESSION_STORAGE_KEY='spot_diff_group_session';
@@ -1132,6 +1138,7 @@ function bindFirstInteractionAudioUnlock(){
  firstInteractionAudioUnlockBound=true;
  const unlockOnInteraction=()=>{
   unlockAllGameAudio();
+  flushDeferredCoinBurst();
  };
  window.addEventListener('pointerdown',unlockOnInteraction,{once:true,passive:true});
  window.addEventListener('touchend',unlockOnInteraction,{once:true,passive:true});
@@ -1781,6 +1788,7 @@ function unlockCoinAudio(){
    moneyAudio.currentTime=0;
    moneyAudio.volume=1;
    moneyAudioUnlocked=true;
+   flushDeferredCoinBurst();
   }).catch(()=>{
    // fallback unlock path
    moneyAudio.muted=true;
@@ -1792,6 +1800,7 @@ function unlockCoinAudio(){
      moneyAudio.muted=false;
      moneyAudio.volume=1;
      moneyAudioUnlocked=true;
+     flushDeferredCoinBurst();
     }).catch(()=>{
      moneyAudio.muted=false;
      moneyAudio.volume=1;
@@ -1806,6 +1815,7 @@ function unlockCoinAudio(){
   moneyAudio.currentTime=0;
   moneyAudio.volume=1;
   moneyAudioUnlocked=true;
+  flushDeferredCoinBurst();
  }
 }
 
@@ -1819,23 +1829,61 @@ function getMoneyAudioLayer(index){
  return layer;
 }
 
+function queueDeferredCoinBurst(){
+ if(deferredCoinBurstPending)return;
+ deferredCoinBurstPending=true;
+ deferredCoinBurstAttempts=0;
+ flushDeferredCoinBurst();
+}
+
+function flushDeferredCoinBurst(){
+ if(!deferredCoinBurstPending)return;
+ if(moneyAudioUnlocked){
+  deferredCoinBurstPending=false;
+  deferredCoinBurstAttempts=0;
+  if(deferredCoinBurstTimer){
+   clearTimeout(deferredCoinBurstTimer);
+   deferredCoinBurstTimer=null;
+  }
+  playCoinBurstLayers();
+  return;
+ }
+ if(deferredCoinBurstAttempts>=DEFERRED_COIN_BURST_MAX_ATTEMPTS)return;
+ if(deferredCoinBurstTimer)return;
+ deferredCoinBurstAttempts+=1;
+ deferredCoinBurstTimer=setTimeout(()=>{
+  deferredCoinBurstTimer=null;
+  flushDeferredCoinBurst();
+ },DEFERRED_COIN_BURST_RETRY_MS);
+}
+
+function playCoinBurstLayers(){
+ const layers=Math.max(1,MONEY_BURST_LAYERS);
+ for(let i=0;i<layers;i++){
+  const offset=MONEY_BURST_OFFSETS_MS[i]||0;
+  const layer=getMoneyAudioLayer(i);
+  setTimeout(()=>{
+   try{
+    layer.currentTime=0;
+    // Two layers (~1.5x perceived loudness without WebAudio gain).
+    layer.volume=i===0?1:0.55;
+    const p=layer.play();
+    if(p&&typeof p.catch==='function'){
+     p.catch(()=>{
+      if(!moneyAudioUnlocked)queueDeferredCoinBurst();
+     });
+    }
+   }catch(_){
+    if(!moneyAudioUnlocked)queueDeferredCoinBurst();
+   }
+  },offset);
+ }
+}
+
 function playCoinBurst(totalMs){
  try{
   if(!moneyAudioUnlocked)unlockCoinAudio();
-  const layers=Math.max(1,MONEY_BURST_LAYERS);
-  for(let i=0;i<layers;i++){
-   const offset=MONEY_BURST_OFFSETS_MS[i]||0;
-   const layer=getMoneyAudioLayer(i);
-   setTimeout(()=>{
-    try{
-     layer.currentTime=0;
-     // Two layers (~1.5x perceived loudness without WebAudio gain).
-     layer.volume=i===0?1:0.55;
-     const p=layer.play();
-     if(p&&typeof p.catch==='function')p.catch(()=>{});
-    }catch(_){ }
-   },offset);
-  }
+  playCoinBurstLayers();
  }catch(_){ }
 }
 
@@ -2494,7 +2542,7 @@ function launchConfetti(){
 }
 
 function updateStatus(){
- if(statusEl)statusEl.innerText=getMiniGameName(currentMiniGameIndex);
+ if(statusEl)statusEl.innerText='נמצאו: '+found.length+'/'+differences.length;
  const lostHearts=Math.min(heartsEls.length,Math.floor(mistakes/3));
  heartsEls.forEach((heart,i)=>heart.classList.toggle('lost',i<lostHearts));
  starsEls.forEach((star,i)=>star.classList.toggle('found',paintedStars.has(i)));
