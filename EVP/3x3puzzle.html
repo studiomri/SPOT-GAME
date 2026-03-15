@@ -260,9 +260,50 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
           transform: translate(-50%, -50%) scale(1.12);
         }
       }
+
+      #portraitOnlyOverlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 20000;
+        background: rgba(0, 0, 0, 0.88);
+        padding: 24px;
+      }
+
+      #portraitOnlyOverlay .portraitOnlyCard {
+        max-width: min(520px, 92vw);
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 16px;
+        background: rgba(15, 15, 15, 0.9);
+        padding: 22px 18px;
+        color: #fff;
+        font-size: clamp(18px, 4.2vw, 26px);
+        font-weight: 800;
+        line-height: 1.35;
+        text-align: center;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+      }
+
+      body.force-portrait {
+        overflow: hidden;
+      }
+
+      body.force-portrait > :not(#portraitOnlyOverlay) {
+        display: none !important;
+      }
+
+      body.force-portrait #portraitOnlyOverlay {
+        display: flex !important;
+      }
     </style>
   </head>
   <body>
+    <div id="portraitOnlyOverlay" class="hidden" aria-live="polite">
+      <div class="portraitOnlyCard">למשחק יש לסובב את הטלפון למצב אנכי</div>
+    </div>
+
     <main class="app">
       <section class="board" id="board"></section>
     </main>
@@ -299,6 +340,7 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
       const finishBackdrop = document.getElementById("finishBackdrop");
       const finishPopup = document.getElementById("finishPopup");
       const finishEndBtn = document.getElementById("finishEndBtn");
+      const portraitOnlyOverlay = document.getElementById("portraitOnlyOverlay");
 
       let imageURL = DEFAULT_IMAGE;
       let board = [];
@@ -351,6 +393,17 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
         window.addEventListener("touchstart", unlockOnInteraction, { once: true, passive: true });
         window.addEventListener("touchend", unlockOnInteraction, { once: true, passive: true });
         window.addEventListener("keydown", unlockOnInteraction, { once: true });
+      }
+
+      function updatePortraitOnlyMode() {
+        const shortSide = Math.min(window.innerWidth, window.innerHeight);
+        const isMobileViewport = shortSide <= 900;
+        const isLandscape = window.innerWidth > window.innerHeight;
+        const shouldForce = isMobileViewport && isLandscape;
+        document.body.classList.toggle("force-portrait", shouldForce);
+        if (portraitOnlyOverlay) {
+          portraitOnlyOverlay.classList.toggle("hidden", !shouldForce);
+        }
       }
 
       function createSolvedBoard() {
@@ -642,6 +695,9 @@ button:focus,button:focus-visible,a:focus,a:focus-visible,input:focus,select:foc
           window.location.href = "index.html?home=1";
         });
       }
+      window.addEventListener("resize", updatePortraitOnlyMode);
+      window.addEventListener("orientationchange", updatePortraitOnlyMode);
+      updatePortraitOnlyMode();
       startPuzzle();
     </script>
   </body>
